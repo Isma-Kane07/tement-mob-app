@@ -26,11 +26,15 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
-	<key>UIApplicationSceneManifest</key>
+	
+	<!-- Permissions -->
 	<key>NSCameraUsageDescription</key>
-<string>Nous avons besoin de la caméra pour prendre des photos de votre logement</string>
-<key>NSPhotoLibraryUsageDescription</key>
-<string>Nous avons besoin d'accéder à votre galerie pour sélectionner des photos de votre logement</string>
+	<string>Nous avons besoin de la caméra pour prendre des photos de votre logement</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Nous avons besoin d'accéder à votre galerie pour sélectionner des photos de votre logement</string>
+	
+	<!-- Scene Manifest -->
+	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
 		<false/>
@@ -51,6 +55,7 @@
 			</array>
 		</dict>
 	</dict>
+	
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
