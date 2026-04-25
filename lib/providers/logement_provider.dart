@@ -9,11 +9,25 @@ class LogementProvider extends ChangeNotifier {
   List<Logement> _mesLogements = []; // Pour le propriétaire
   bool _isLoading = false;
   String? _error;
+  bool _isDisposed = false; // ✅ AJOUTÉ pour éviter les erreurs après dispose
 
   List<Logement> get logements => _logements;
   List<Logement> get mesLogements => _mesLogements;
   bool get isLoading => _isLoading;
   String? get error => _error;
+
+  // ✅ Vérifier si le provider n'est pas disposé avant de notifier
+  void _safeNotifyListeners() {
+    if (!_isDisposed) {
+      notifyListeners();
+    }
+  }
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    super.dispose();
+  }
 
   // ✅ MODIFIÉ : Charger tous les logements avec recherche
   Future<void> loadLogements({
@@ -22,9 +36,12 @@ class LogementProvider extends ChangeNotifier {
     double? minPrix,
     double? maxPrix,
   }) async {
+    // Éviter les appels multiples
+    if (_isLoading) return;
+
     _isLoading = true;
     _error = null;
-    notifyListeners();
+    _safeNotifyListeners();
 
     try {
       _logements = await _logementService.getLogements(
@@ -39,15 +56,17 @@ class LogementProvider extends ChangeNotifier {
       print('❌ Erreur chargement logements: $_error');
     } finally {
       _isLoading = false;
-      notifyListeners();
+      _safeNotifyListeners();
     }
   }
 
   // ✅ NOUVEAU : Charger les logements du propriétaire connecté
   Future<void> loadMesLogements(int proprietaireId) async {
+    if (_isLoading) return;
+
     _isLoading = true;
     _error = null;
-    notifyListeners();
+    _safeNotifyListeners();
 
     try {
       _mesLogements = await _logementService.getLogements(
@@ -59,8 +78,25 @@ class LogementProvider extends ChangeNotifier {
       print('❌ Erreur chargement mes logements: $_error');
     } finally {
       _isLoading = false;
-      notifyListeners();
+      _safeNotifyListeners();
     }
+  }
+
+  // ✅ Charger après la construction (utile pour initState)
+  Future<void> loadLogementsAfterBuild({
+    String? search,
+    String? type,
+    double? minPrix,
+    double? maxPrix,
+  }) async {
+    // Petit délai pour permettre à la build de terminer
+    await Future.delayed(const Duration(milliseconds: 100));
+    await loadLogements(
+      search: search,
+      type: type,
+      minPrix: minPrix,
+      maxPrix: maxPrix,
+    );
   }
 
   // ✅ NOUVEAU : Désactiver/Activer un logement
@@ -80,10 +116,11 @@ class LogementProvider extends ChangeNotifier {
         _mesLogements[indexMes] = updated;
       }
 
-      notifyListeners();
+      _safeNotifyListeners();
       return true;
     } catch (e) {
       _error = e.toString().replaceAll('Exception: ', '');
+      _safeNotifyListeners();
       return false;
     }
   }
@@ -103,7 +140,7 @@ class LogementProvider extends ChangeNotifier {
   }) async {
     _isLoading = true;
     _error = null;
-    notifyListeners();
+    _safeNotifyListeners();
 
     try {
       final nouveauLogement = await _logementService.creerLogement(
@@ -122,7 +159,7 @@ class LogementProvider extends ChangeNotifier {
       return false;
     } finally {
       _isLoading = false;
-      notifyListeners();
+      _safeNotifyListeners();
     }
   }
 
@@ -146,7 +183,7 @@ class LogementProvider extends ChangeNotifier {
   }) async {
     _isLoading = true;
     _error = null;
-    notifyListeners();
+    _safeNotifyListeners();
 
     try {
       final updated = await _logementService.modifierLogement(
@@ -173,7 +210,7 @@ class LogementProvider extends ChangeNotifier {
       return false;
     } finally {
       _isLoading = false;
-      notifyListeners();
+      _safeNotifyListeners();
     }
   }
 
@@ -181,7 +218,7 @@ class LogementProvider extends ChangeNotifier {
   Future<bool> deleteLogement(int id) async {
     _isLoading = true;
     _error = null;
-    notifyListeners();
+    _safeNotifyListeners();
 
     try {
       await _logementService.supprimerLogement(id);
@@ -193,12 +230,12 @@ class LogementProvider extends ChangeNotifier {
       return false;
     } finally {
       _isLoading = false;
-      notifyListeners();
+      _safeNotifyListeners();
     }
   }
 
   void clearError() {
     _error = null;
-    notifyListeners();
+    _safeNotifyListeners();
   }
 }

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "443031512558",
+    "project_id": "app-tement",
+    "storage_bucket": "app-tement.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:443031512558:android:b4da79704d860f42085aff",
+        "android_client_info": {
+          "package_name": "com.example.tement_mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDVWEVJv6r1Gyp5R1T8d5pPAxwJG-CDFbA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

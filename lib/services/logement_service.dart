@@ -20,8 +20,9 @@ class LogementService {
       if (type != null && type.isNotEmpty) queryParams['type'] = type;
       if (minPrix != null) queryParams['minPrix'] = minPrix;
       if (maxPrix != null) queryParams['maxPrix'] = maxPrix;
-      if (proprietaireId != null)
+      if (proprietaireId != null) {
         queryParams['proprietaire_id'] = proprietaireId;
+      }
 
       final response = await _apiService.get(
         ApiConstants.logements,

@@ -1,3 +1,4 @@
+// lib/services/upload_service.dart
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:tement_mobile/config/constants.dart';
@@ -12,18 +13,22 @@ class UploadService {
 
   final StorageService _storage = StorageService();
 
-  // Upload une seule photo
+  // Upload d'une seule photo (profile ou logement)
   Future<String> uploadPhoto(File imageFile) async {
     try {
       final token = await _storage.getToken();
+      if (token == null) throw Exception('Non authentifié');
 
-      String fileName = imageFile.path.split('/').last;
-      FormData formData = FormData.fromMap({
+      final fileName = imageFile.path.split('/').last;
+
+      final formData = FormData.fromMap({
         'photo': await MultipartFile.fromFile(
           imageFile.path,
           filename: fileName,
         ),
       });
+
+      print('📤 Upload photo: $fileName (${await imageFile.length()} bytes)');
 
       final response = await _dio.post(
         '/upload/photo',
@@ -36,40 +41,47 @@ class UploadService {
         ),
       );
 
+      print('✅ Photo uploadée: ${response.data['url']}');
       return response.data['url'];
+    } on DioException catch (e) {
+      print('❌ Erreur upload photo: ${e.response?.data}');
+      throw Exception('Impossible d\'uploader la photo: ${e.message}');
     } catch (e) {
       print('❌ Erreur upload photo: $e');
       throw Exception('Impossible d\'uploader la photo');
     }
   }
 
-  // ✅ VERSION CORRIGÉE - Upload plusieurs photos
+  // Upload multiple de photos
   Future<List<String>> uploadMultiplePhotos(List<File> imageFiles) async {
     try {
       final token = await _storage.getToken();
+      if (token == null) throw Exception('Non authentifié');
 
-      // Créer une liste pour stocker les MultipartFile
-      List<MultipartFile> multipartFiles = [];
+      print('📦 Préparation de ${imageFiles.length} fichiers...');
+
+      // Créer la liste des MultipartFile
+      final multipartFiles = <MultipartFile>[];
 
       for (int i = 0; i < imageFiles.length; i++) {
         final file = imageFiles[i];
         final fileName = file.path.split('/').last;
 
-        print('📦 Préparation fichier ${i + 1}: $fileName');
+        print('  - Fichier ${i + 1}: $fileName (${await file.length()} bytes)');
 
-        final multipartFile = await MultipartFile.fromFile(
-          file.path,
-          filename: fileName,
+        multipartFiles.add(
+          await MultipartFile.fromFile(
+            file.path,
+            filename: fileName,
+          ),
         );
-        multipartFiles.add(multipartFile);
       }
 
-      // ✅ CORRECTION: Utiliser 'photos[]' ou une liste avec la même clé
       final formData = FormData.fromMap({
-        'photos': multipartFiles, // Dio gère automatiquement le tableau
+        'photos': multipartFiles,
       });
 
-      print('📤 Envoi de ${multipartFiles.length} fichiers...');
+      print('📤 Envoi de ${multipartFiles.length} fichiers vers Cloudinary...');
 
       final response = await _dio.post(
         '/upload/photos',
@@ -83,73 +95,55 @@ class UploadService {
       );
 
       print('📥 Réponse reçue: ${response.statusCode}');
-      print('📥 Données: ${response.data}');
 
-      // Extraire les URLs de la réponse
       if (response.data['urls'] != null) {
-        return (response.data['urls'] as List)
+        final urls = (response.data['urls'] as List)
             .map((item) => item['url'] as String)
             .toList();
+        print('✅ ${urls.length} photos uploadées avec succès');
+        return urls;
       }
 
       return [];
+    } on DioException catch (e) {
+      print('❌ Erreur upload multiple: ${e.response?.data}');
+      throw Exception('Impossible d\'uploader les photos: ${e.message}');
     } catch (e) {
       print('❌ Erreur upload multiple: $e');
-      if (e is DioException) {
-        print('🔍 Détails: ${e.response?.data}');
-      }
       throw Exception('Impossible d\'uploader les photos');
     }
   }
 
-  // ✅ Version alternative avec upload séquentiel (plus fiable)
+  // Upload photo de profil (alias pour uploadPhoto)
+  Future<String> uploadProfilePhoto(File imageFile) async {
+    return await uploadPhoto(imageFile);
+  }
+
+  // Upload séquentiel (plus fiable pour beaucoup de photos)
   Future<List<String>> uploadMultiplePhotosSequential(
       List<File> imageFiles) async {
-    List<String> urls = [];
+    final List<String> urls = [];
+    int successCount = 0;
 
     for (int i = 0; i < imageFiles.length; i++) {
       try {
         print('📤 Upload photo ${i + 1}/${imageFiles.length}');
         final url = await uploadPhoto(imageFiles[i]);
         urls.add(url);
-        print('✅ Photo ${i + 1} uploadée: $url');
+        successCount++;
+        print('✅ Photo ${i + 1} uploadée');
       } catch (e) {
         print('❌ Erreur sur photo ${i + 1}: $e');
-        throw Exception('Erreur lors de l\'upload de la photo ${i + 1}');
+        // Continue avec les autres photos
       }
     }
 
-    return urls;
-  }
+    print('✅ $successCount/${imageFiles.length} photos uploadées');
 
-  // Upload photo de profil
-  Future<String> uploadProfilePhoto(File imageFile) async {
-    try {
-      final token = await _storage.getToken();
-
-      String fileName = imageFile.path.split('/').last;
-      FormData formData = FormData.fromMap({
-        'photo': await MultipartFile.fromFile(
-          imageFile.path,
-          filename: fileName,
-        ),
-      });
-
-      final response = await _dio.post(
-        '/upload/photo', // Réutilise la même route d'upload
-        data: formData,
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer $token',
-            'Content-Type': 'multipart/form-data',
-          },
-        ),
-      );
-
-      return response.data['url'];
-    } catch (e) {
-      print('❌ Erreur upload photo de profil: $e');
-      throw Exception('Impossible d\'uploader la photo');
+    if (urls.isEmpty) {
+      throw Exception('Aucune photo n\'a pu être uploadée');
     }
+
+    return urls;
   }
 }

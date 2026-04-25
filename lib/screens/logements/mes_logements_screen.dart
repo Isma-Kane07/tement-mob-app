@@ -228,7 +228,7 @@ class _MesLogementsScreenState extends State<MesLogementsScreen> {
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 8),
-                    Text(
+                    const Text(
                       'Commencez par ajouter votre premier logement à louer',
                       textAlign: TextAlign.center,
                       style: TextStyle(
@@ -362,9 +362,9 @@ class _MesLogementsScreenState extends State<MesLogementsScreen> {
 
                         // Barre d'actions
                         Container(
-                          decoration: BoxDecoration(
+                          decoration: const BoxDecoration(
                             color: TementColors.lightBackground,
-                            borderRadius: const BorderRadius.only(
+                            borderRadius: BorderRadius.only(
                               bottomLeft: Radius.circular(16),
                               bottomRight: Radius.circular(16),
                             ),

@@ -246,7 +246,7 @@ class ProfileScreen extends StatelessWidget {
           padding: const EdgeInsets.only(left: 8, bottom: 12),
           child: Text(
             title,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
               color: TementColors.greySecondary,
@@ -254,7 +254,7 @@ class ProfileScreen extends StatelessWidget {
             ),
           ),
         ),
-        ...items.map((item) => _buildMenuItem(item)).toList(),
+        ...items.map((item) => _buildMenuItem(item)),
       ],
     );
   }
@@ -300,13 +300,13 @@ class ProfileScreen extends StatelessWidget {
         subtitle: item.subtitle != null
             ? Text(
                 item.subtitle!,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 13,
                   color: TementColors.greySecondary,
                 ),
               )
             : null,
-        trailing: Icon(
+        trailing: const Icon(
           Icons.arrow_forward_ios,
           size: 16,
           color: TementColors.greySecondary,

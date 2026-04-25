@@ -28,7 +28,6 @@ class _LogementsScreenState extends State<LogementsScreen>
   @override
   void initState() {
     super.initState();
-    _loadLogements();
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
@@ -37,6 +36,11 @@ class _LogementsScreenState extends State<LogementsScreen>
       parent: _animationController,
       curve: Curves.easeInOut,
     );
+
+    // ✅ CORRIGÉ: Utiliser addPostFrameCallback
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadLogements();
+    });
   }
 
   @override
@@ -48,7 +52,9 @@ class _LogementsScreenState extends State<LogementsScreen>
   }
 
   Future<void> _loadLogements() async {
-    await Provider.of<LogementProvider>(context, listen: false).loadLogements(
+    // ✅ Utiliser la méthode sécurisée du provider
+    await Provider.of<LogementProvider>(context, listen: false)
+        .loadLogementsAfterBuild(
       search: _searchController.text.isNotEmpty ? _searchController.text : null,
       type: _selectedType,
       minPrix: _prixRange.start > 0 ? _prixRange.start : null,
@@ -86,33 +92,27 @@ class _LogementsScreenState extends State<LogementsScreen>
       backgroundColor: isDark ? const Color(0xFF1A1A2E) : Colors.grey.shade50,
       appBar: AppBar(
         title: const Text(
-          'Logements disponibles',
-          style: TextStyle(fontWeight: FontWeight.w600),
-        ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: isDark
-                  ? [const Color(0xFF16213E), const Color(0xFF1A1A2E)]
-                  : [Colors.white, Colors.grey.shade50],
-            ),
+          'Appartements & Maisons',
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            color: Colors.white, // ✅ Texte blanc
           ),
         ),
-        foregroundColor: TementColors.indigoTech,
+        backgroundColor: TementColors.indigoTech, // ✅ Fond indigo visible
+        elevation: 0,
+        foregroundColor: Colors.white, // ✅ Icône retour blanche
         actions: [
           if (user?.isProprietaire ?? false)
             Container(
               margin: const EdgeInsets.only(right: 4),
               decoration: BoxDecoration(
-                color: TementColors.indigoTech.withOpacity(0.1),
+                color:
+                    Colors.white.withOpacity(0.2), // ✅ Fond blanc transparent
                 borderRadius: BorderRadius.circular(12),
               ),
               child: IconButton(
-                icon: const Icon(Icons.format_list_bulleted),
+                icon:
+                    const Icon(Icons.format_list_bulleted, color: Colors.white),
                 onPressed: () {
                   Navigator.push(
                     context,
@@ -127,11 +127,11 @@ class _LogementsScreenState extends State<LogementsScreen>
           Container(
             margin: const EdgeInsets.only(right: 8),
             decoration: BoxDecoration(
-              color: TementColors.indigoTech.withOpacity(0.1),
+              color: Colors.white.withOpacity(0.2), // ✅ Fond blanc transparent
               borderRadius: BorderRadius.circular(12),
             ),
             child: IconButton(
-              icon: const Icon(Icons.refresh),
+              icon: const Icon(Icons.refresh, color: Colors.white),
               onPressed: _loadLogements,
               tooltip: 'Actualiser',
             ),
@@ -160,7 +160,7 @@ class _LogementsScreenState extends State<LogementsScreen>
                           color: Colors.grey.shade400,
                           fontSize: 15,
                         ),
-                        prefixIcon: Icon(
+                        prefixIcon: const Icon(
                           Icons.search,
                           color: TementColors.indigoTech,
                         ),
@@ -248,7 +248,7 @@ class _LogementsScreenState extends State<LogementsScreen>
                       children: [
                         Row(
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.filter_alt,
                               size: 20,
                               color: TementColors.sunsetOrange,
@@ -273,14 +273,14 @@ class _LogementsScreenState extends State<LogementsScreen>
                             color: isDark ? Colors.grey.shade900 : Colors.white,
                           ),
                           child: DropdownButtonFormField<String>(
-                            value: _selectedType,
+                            initialValue: _selectedType,
                             hint: Text(
                               'Type de logement',
                               style: TextStyle(
                                 color: Colors.grey.shade600,
                               ),
                             ),
-                            icon: Icon(
+                            icon: const Icon(
                               Icons.keyboard_arrow_down,
                               color: TementColors.indigoTech,
                             ),

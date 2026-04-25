@@ -1,9 +1,13 @@
+// lib/providers/auth_provider.dart
 import 'package:flutter/material.dart';
 import 'package:tement_mobile/models/user.dart';
 import 'package:tement_mobile/services/auth_service.dart';
 import 'package:tement_mobile/services/user_service.dart';
 import 'package:tement_mobile/services/upload_service.dart';
 import 'package:tement_mobile/services/storage_service.dart';
+import 'package:tement_mobile/services/notification_service.dart';
+import 'package:tement_mobile/services/api_service.dart';
+import 'package:tement_mobile/config/constants.dart';
 import 'dart:io';
 
 class AuthProvider extends ChangeNotifier {
@@ -21,7 +25,10 @@ class AuthProvider extends ChangeNotifier {
   bool get isAuthenticated => _user != null;
 
   AuthProvider() {
-    _loadUser();
+    // ✅ Utiliser addPostFrameCallback pour éviter les problèmes de build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadUser();
+    });
   }
 
   // Charger l'utilisateur depuis le stockage
@@ -41,7 +48,46 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  // Connexion
+  // ✅ Sauvegarder le token FCM sur le serveur
+  Future<void> _saveFcmTokenToServer() async {
+    final notificationService = NotificationService();
+    final token = notificationService.fcmToken;
+
+    if (token != null) {
+      try {
+        final apiService = ApiService();
+        await apiService.post(ApiConstants.saveFcmToken, data: {
+          'fcmToken': token,
+        });
+        print('✅ Token FCM sauvegardé sur le serveur après connexion');
+      } catch (e) {
+        print('❌ Erreur sauvegarde token FCM: $e');
+      }
+    } else {
+      print('⚠️ Aucun token FCM disponible');
+    }
+  }
+
+  // ✅ S'abonner aux topics après connexion
+  Future<void> _subscribeToTopics() async {
+    final notificationService = NotificationService();
+
+    if (_user != null) {
+      // S'abonner au topic personnel
+      await notificationService.subscribeToTopic('user_${_user!.id}');
+
+      // S'abonner selon le rôle
+      if (_user!.isProprietaire) {
+        await notificationService.subscribeToTopic('proprietaires');
+      } else if (_user!.isLocataire) {
+        await notificationService.subscribeToTopic('locataires');
+      }
+
+      print('📡 Abonné aux topics pour ${_user!.nom}');
+    }
+  }
+
+  // ✅ CONNEXION CORRIGÉE AVEC NOTIFICATIONS
   Future<bool> login(String telephone, String password) async {
     _isLoading = true;
     _error = null;
@@ -51,6 +97,12 @@ class AuthProvider extends ChangeNotifier {
       print('📤 Tentative connexion: $telephone');
       _user = await _authService.login(telephone, password);
       print('✅ Connexion réussie pour ${_user?.nom}');
+
+      // ✅ Sauvegarder le token FCM après connexion
+      await _saveFcmTokenToServer();
+
+      // ✅ S'abonner aux topics après connexion
+      await _subscribeToTopics();
 
       notifyListeners();
       return true;
@@ -71,16 +123,17 @@ class AuthProvider extends ChangeNotifier {
         _error = errorMessage;
       }
 
+      notifyListeners();
       return false;
     } finally {
       _isLoading = false;
-      if (_error != null) {
+      if (_user == null) {
         notifyListeners();
       }
     }
   }
 
-  // Inscription
+  // ✅ INSCRIPTION CORRIGÉE
   Future<bool> signup({
     required String nom,
     required String telephone,
@@ -103,6 +156,12 @@ class AuthProvider extends ChangeNotifier {
 
       print('✅ Inscription réussie pour ${_user?.nom}');
 
+      // ✅ Sauvegarder le token FCM après inscription
+      await _saveFcmTokenToServer();
+
+      // ✅ S'abonner aux topics après inscription
+      await _subscribeToTopics();
+
       notifyListeners();
       return true;
     } catch (e) {
@@ -121,10 +180,11 @@ class AuthProvider extends ChangeNotifier {
         _error = errorMessage;
       }
 
+      notifyListeners();
       return false;
     } finally {
       _isLoading = false;
-      if (_error != null) {
+      if (_user == null) {
         notifyListeners();
       }
     }
@@ -149,7 +209,6 @@ class AuthProvider extends ChangeNotifier {
         photoUrl: photoUrl,
       );
 
-      // Mettre à jour l'utilisateur local
       _user = updatedUser;
       await _storage.saveUser(updatedUser);
 
@@ -159,6 +218,7 @@ class AuthProvider extends ChangeNotifier {
     } catch (e) {
       print('❌ Erreur mise à jour profil: $e');
       _error = e.toString().replaceAll('Exception: ', '');
+      notifyListeners();
       return false;
     } finally {
       _isLoading = false;
@@ -179,11 +239,11 @@ class AuthProvider extends ChangeNotifier {
 
       print('✅ Photo uploadée: $photoUrl');
 
-      // Mettre à jour le profil avec la nouvelle URL
       return await updateProfile(photoUrl: photoUrl);
     } catch (e) {
       print('❌ Erreur upload photo: $e');
       _error = e.toString().replaceAll('Exception: ', '');
+      notifyListeners();
       return false;
     } finally {
       _isLoading = false;

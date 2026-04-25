@@ -175,7 +175,7 @@ class _WalletScreenState extends State<WalletScreen> {
                         ),
                   ),
                   const SizedBox(height: 8),
-                  Text(
+                  const Text(
                     'Retirez vos gains vers votre compte',
                     style: TextStyle(
                       color: TementColors.greySecondary,
@@ -376,13 +376,20 @@ class _WalletScreenState extends State<WalletScreen> {
     return Scaffold(
       backgroundColor: TementColors.lightBackground,
       appBar: AppBar(
-        title: const Text('Mon Wallet'),
-        backgroundColor: Colors.transparent,
+        title: const Text(
+          'Mon Wallet',
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            color: Colors.white, // ✅ Texte blanc
+          ),
+        ),
+        backgroundColor: TementColors.indigoTech, // ✅ Fond indigo visible
         elevation: 0,
-        foregroundColor: TementColors.indigoTech,
+        foregroundColor: Colors.white, // ✅ Icône retour blanche
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh,
+                color: Colors.white), // ✅ Icône blanche
             onPressed: _loadHistorique,
           ),
         ],
@@ -610,7 +617,7 @@ class _WalletScreenState extends State<WalletScreen> {
                               style: Theme.of(context).textTheme.titleLarge,
                             ),
                             const SizedBox(height: 8),
-                            Text(
+                            const Text(
                               'Vos demandes de retrait apparaîtront ici',
                               textAlign: TextAlign.center,
                               style: TextStyle(
@@ -621,9 +628,7 @@ class _WalletScreenState extends State<WalletScreen> {
                         ),
                       )
                     else
-                      ..._retraits
-                          .map((retrait) => _buildRetraitTile(retrait))
-                          .toList(),
+                      ..._retraits.map((retrait) => _buildRetraitTile(retrait)),
                   ],
                 ),
               ),
@@ -726,7 +731,7 @@ class _WalletScreenState extends State<WalletScreen> {
                   if (retrait.createdAt != null)
                     Text(
                       dateFormat.format(retrait.createdAt!),
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 12,
                         color: TementColors.greySecondary,
                       ),

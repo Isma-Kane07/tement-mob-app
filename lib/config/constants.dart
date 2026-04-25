@@ -2,8 +2,7 @@ class ApiConstants {
   // ✅ URL DE PRODUCTION (Railway)
   static const String baseUrl = 'https://tement-back.up.railway.app/api';
 
-  // URLs de développement (gardées en commentaire pour référence)
-  // static const String baseUrl = 'http://10.0.2.2:5000/api'; // Émulateur Android
+  //static const String baseUrl = 'http://10.0.2.2:5000/api'; // Émulateur Android
   // static const String baseUrl = 'http://ABBA-COMPUTER:5000/api'; // Réseau local
 
   // Auth
@@ -27,6 +26,9 @@ class ApiConstants {
 
   // Users
   static const String users = '/users/me';
+
+  // ✅ Notifications
+  static const String saveFcmToken = '/notifications/save-token';
 
   // Optionnel : Health check pour debug
   static const String health = '/health';

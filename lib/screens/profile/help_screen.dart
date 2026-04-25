@@ -160,7 +160,7 @@ class HelpScreen extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             child: Text(
               answer,
-              style: TextStyle(color: TementColors.greySecondary),
+              style: const TextStyle(color: TementColors.greySecondary),
             ),
           ),
         ],
@@ -201,7 +201,7 @@ class HelpScreen extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(day, style: const TextStyle(fontWeight: FontWeight.w500)),
-          Text(hours, style: TextStyle(color: TementColors.greySecondary)),
+          Text(hours, style: const TextStyle(color: TementColors.greySecondary)),
         ],
       ),
     );

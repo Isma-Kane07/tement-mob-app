@@ -108,7 +108,7 @@ class _AjouterLogementScreenState extends State<AjouterLogementScreen> {
         print('📤 Upload de ${_selectedImages.length} photos...');
 
         // Simuler une progression (optionnel)
-        Future.delayed(Duration(milliseconds: 500), () {
+        Future.delayed(const Duration(milliseconds: 500), () {
           setState(() => _uploadProgress = 0.3);
         });
 
@@ -182,7 +182,7 @@ class _AjouterLogementScreenState extends State<AjouterLogementScreen> {
                       child: LinearProgressIndicator(
                         value: _uploadProgress,
                         backgroundColor: Colors.grey[300],
-                        valueColor: AlwaysStoppedAnimation<Color>(
+                        valueColor: const AlwaysStoppedAnimation<Color>(
                           TementColors.sunsetOrange,
                         ),
                       ),
@@ -219,18 +219,18 @@ class _AjouterLogementScreenState extends State<AjouterLogementScreen> {
                       },
                       style: ButtonStyle(
                         backgroundColor:
-                            MaterialStateProperty.resolveWith<Color?>(
-                          (Set<MaterialState> states) {
-                            if (states.contains(MaterialState.selected)) {
+                            WidgetStateProperty.resolveWith<Color?>(
+                          (Set<WidgetState> states) {
+                            if (states.contains(WidgetState.selected)) {
                               return TementColors.indigoTech;
                             }
                             return Colors.grey.shade100;
                           },
                         ),
                         foregroundColor:
-                            MaterialStateProperty.resolveWith<Color?>(
-                          (Set<MaterialState> states) {
-                            if (states.contains(MaterialState.selected)) {
+                            WidgetStateProperty.resolveWith<Color?>(
+                          (Set<WidgetState> states) {
+                            if (states.contains(WidgetState.selected)) {
                               return Colors.white;
                             }
                             return TementColors.greySecondary;
@@ -391,7 +391,7 @@ class _AjouterLogementScreenState extends State<AjouterLogementScreen> {
                     Center(
                       child: Text(
                         '${_selectedImages.length} photo(s) sélectionnée(s)',
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: TementColors.greySecondary,
                           fontSize: 12,
                         ),

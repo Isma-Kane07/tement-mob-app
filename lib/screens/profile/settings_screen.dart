@@ -204,7 +204,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         title: Text(title),
         value: value,
         onChanged: onChanged,
-        activeColor: TementColors.sunsetOrange,
+        activeThumbColor: TementColors.sunsetOrange,
       ),
     );
   }

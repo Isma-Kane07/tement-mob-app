@@ -26,7 +26,7 @@ class _ModifierLogementScreenState extends State<ModifierLogementScreen> {
   String _selectedType = 'maison';
   final List<String> _types = ['maison', 'appartement', 'studio'];
 
-  List<File> _newImages = [];
+  final List<File> _newImages = [];
   List<String> _existingPhotos = [];
   final ImagePicker _picker = ImagePicker();
   final UploadService _uploadService = UploadService();
